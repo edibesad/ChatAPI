@@ -1,26 +1,24 @@
-const { Sequelize } = require('sequelize');
-const { DB_NAME, DB_USERNAME, DB_PASSWORD } = require("../constants/hiddenConstants.js")
+const { DB_NAME, DB_PASSWORD } = require("../constants/hiddenConstants.js")
+const { Pool } = require("pg")
+
+const DBPort = 5432
 
 
+const DBPool = new Pool({
+    user: "postgres",
+    host: "localhost",
+    database: DB_NAME,
+    password: DB_PASSWORD,
+    port: DBPort
+})
 
-const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
-    host: 'localhost',
-    dialect: 'postgres',
-    logging: false,
-});
 
-async function testDatabaseConnection() {
-    try {
-        await sequelize.authenticate();
-        console.log('Connection to the database has been established successfully.');
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
-}
+DBPool.connect()
+    .then(() => {
+        console.log("Connected to the database successfully!");
+    })
+    .catch(err => {
+        console.error("Error connecting to the database:", err);
+    });
 
-testDatabaseConnection();
-
-module.exports = {
-    sequelize,
-    testDatabaseConnection,
-};
+module.exports = DBPool

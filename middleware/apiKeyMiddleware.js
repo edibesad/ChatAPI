@@ -1,18 +1,15 @@
-const apiKeyModel = require("../model/apiKey.js")
+const pool = require("../config/dbConfig.js")
 
 
-async function apiKeyMiddleware(req, res) {
-    const apiKey = req.header["api-key"]
+async function apiKeyMiddleware(req, res, next) {
+    const apiKey = req.headers["api-key"]
+    console.log(req.header)
     try {
-        const apiKeyRecord = await apiKeyModel.findOne({
-            where: {
-                api_key: apiKey
-            }
-        })
-        if (apiKeyRecord) {
+        const result = await pool.query("SELECT * FROM api_key_table WHERE api_key LIKE $1", [apiKey])
+        if (result.rowCount != 0) {
             next();
         } else {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: 'API key doğrulanamadı' });
         }
     }
     catch (error) {
